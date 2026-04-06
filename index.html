@@ -1,22 +1,150 @@
+<!--
+  MIT License
+  Copyright (c) 2025 ngboonkhai
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Welcome | Redirecting</title>
-  <meta name="robots" content="noindex">
-  <script>
-    // Wait 1 second, then redirect
-    setTimeout(() => {
-      window.location.href = "https://ngboonkhai.github.io/web.bit-manipulation-tool";
-    }, 1000);
-  </script>
-
-   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5171079448310757"
-     crossorigin="anonymous"></script>
-
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ngboonkhai – Developer Tools</title>
+  <meta name="description" content="Free browser-based developer tools by ngboonkhai — bit manipulation, email quote appender, and more.">
+  <link rel="stylesheet" href="style.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5171079448310757"
+    crossorigin="anonymous"></script>
 </head>
 <body>
-  <p>Welcome! Redirecting you to the <a href="https://ngboonkhai.github.io/web.bit-manipulation-tool">Bit Manipulation Tool</a>...</p>
+
+  <!-- ── Sidebar ────────────────────────────────────── -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo">🛠️</span>
+      <span class="sidebar-title">ngboonkhai</span>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+    </div>
+
+    <ul class="nav-list">
+      <li>
+        <a href="#" class="nav-item active" data-view="home">
+          <span class="nav-icon">🏠</span> Home
+        </a>
+      </li>
+      <li class="nav-section-label">Tools</li>
+      <li>
+        <a href="#" class="nav-item" data-view="bit-tool">
+          <span class="nav-icon">🧮</span> Bit Manipulation
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-item" data-view="quote-tool">
+          <span class="nav-icon">✉️</span> Email Quote Appender
+        </a>
+      </li>
+      <li class="nav-section-label">Info</li>
+      <li>
+        <a href="about.html" class="nav-item">
+          <span class="nav-icon">👤</span> About
+        </a>
+      </li>
+      <li>
+        <a href="privacy.html" class="nav-item">
+          <span class="nav-icon">🔒</span> Privacy Policy
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- ── Overlay (mobile) ───────────────────────────── -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ── Main ──────────────────────────────────────── -->
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open menu">☰</button>
+      <span class="topbar-title" id="topbarTitle">Developer Tools</span>
+    </header>
+
+    <!-- Home view -->
+    <main class="content" id="viewHome">
+      <h1>Welcome to ngboonkhai's Developer Tools</h1>
+      <p class="lead">
+        A collection of free, lightweight, browser-based utilities built for
+        engineers, students, and open-source contributors. No installs, no
+        sign-ups — just open and use.
+      </p>
+
+      <div class="tool-cards">
+
+        <div class="tool-card">
+          <div class="tool-card-icon">🧮</div>
+          <h2>32-Bit Manipulation Tool</h2>
+          <p>
+            Visually edit individual bits of a 32-bit register. Rotate, shift,
+            invert, and zero bits with one click. Instantly see the resulting
+            hexadecimal and decimal values. Ideal for embedded systems engineers
+            and anyone working with hardware registers or bitwise operations.
+          </p>
+          <ul>
+            <li>Click any bit to toggle it</li>
+            <li>Rotate left / right, shift left / right</li>
+            <li>1's complement &amp; zero all bits</li>
+            <li>Fill from hex or decimal input</li>
+          </ul>
+          <button class="card-btn" data-view="bit-tool">Open Tool →</button>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-icon">✉️</div>
+          <h2>Email Quote Appender</h2>
+          <p>
+            Automatically prepends <code>&gt;</code> to every line of an email,
+            following the plain-text quoting convention used by the U-Boot and
+            Linux kernel mailing lists. Supports nested quoting, configurable
+            80-column line wrapping, and one-click copy.
+          </p>
+          <ul>
+            <li>Live output as you type or paste</li>
+            <li>Correctly handles already-quoted lines</li>
+            <li>Auto word-wrap at configurable column limit</li>
+            <li>One-click copy to clipboard</li>
+          </ul>
+          <button class="card-btn" data-view="quote-tool">Open Tool →</button>
+        </div>
+
+      </div>
+
+      <div class="tool-info">
+        <h2>About These Tools</h2>
+        <p>
+          All tools run entirely in your browser — no data is sent to any server.
+          They are open-source (MIT licence) and hosted on GitHub Pages.
+          Use the sidebar on the left to switch between tools, or click the
+          buttons above to jump straight in.
+        </p>
+        <h2>Who Are These For?</h2>
+        <p>
+          – Embedded software and firmware engineers debugging hardware registers.<br>
+          – Linux kernel and U-Boot contributors replying to patch review emails.<br>
+          – Students learning computer architecture, bitwise operations, or
+          open-source contribution workflows.
+        </p>
+      </div>
+    </main>
+
+    <!-- Tool iframes (hidden until selected) -->
+    <div class="iframe-view hidden" id="viewBitTool">
+      <iframe src="tools/web.bit-manipulation-tool/index.html"
+              title="32-Bit Manipulation Tool"
+              loading="lazy"></iframe>
+    </div>
+    <div class="iframe-view hidden" id="viewQuoteTool">
+      <iframe src="tools/web.email-quote-appender/index.html"
+              title="Email Quote Appender"
+              loading="lazy"></iframe>
+    </div>
+
+  </div><!-- /.main-wrapper -->
+
+  <script src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,30 @@
+name: Update Submodules
+
+on:
+  # Run every day at midnight UTC
+  schedule:
+    - cron: '0 0 * * *'
+  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  update-submodules:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout hub repo (with submodules)
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+          submodules: recursive
+
+      - name: Pull latest commits for all submodules
+        run: git submodule update --remote --merge
+
+      - name: Commit and push if submodules changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --staged --quiet || git commit -m "chore: update submodules to latest"
+          git push

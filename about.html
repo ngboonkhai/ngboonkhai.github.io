@@ -1,0 +1,101 @@
+<!--
+  MIT License
+  Copyright (c) 2025 ngboonkhai
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About – ngboonkhai Developer Tools</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo">🛠️</span>
+      <span class="sidebar-title">ngboonkhai</span>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+    </div>
+    <ul class="nav-list">
+      <li><a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a></li>
+      <li class="nav-section-label">Tools</li>
+      <li><a href="index.html#bit-tool" class="nav-item"><span class="nav-icon">🧮</span> Bit Manipulation</a></li>
+      <li><a href="index.html#quote-tool" class="nav-item"><span class="nav-icon">✉️</span> Email Quote Appender</a></li>
+      <li class="nav-section-label">Info</li>
+      <li><a href="about.html" class="nav-item active"><span class="nav-icon">👤</span> About</a></li>
+      <li><a href="privacy.html" class="nav-item"><span class="nav-icon">🔒</span> Privacy Policy</a></li>
+    </ul>
+  </nav>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open menu">☰</button>
+      <span class="topbar-title">👤 About</span>
+    </header>
+
+    <main class="page-content">
+      <h1>About</h1>
+
+      <p>
+        Hi, I'm <strong>ngboonkhai</strong> — an embedded software engineer with
+        a passion for building small, practical tools that solve real everyday
+        problems faced by engineers and developers.
+      </p>
+
+      <h2>Why This Site?</h2>
+      <p>
+        Many day-to-day tasks in embedded development and open-source
+        contribution involve repetitive steps — toggling bits in a register,
+        formatting an email reply for a mailing list — that don't have a
+        convenient dedicated tool. This site collects those small utilities in
+        one place, free and ad-light.
+      </p>
+
+      <h2>The Tools</h2>
+      <ul>
+        <li>
+          <strong>32-Bit Manipulation Tool</strong> — a visual bit editor for
+          32-bit hardware registers. Useful for embedded engineers, students
+          learning computer architecture, and anyone working with bitwise
+          operations.
+        </li>
+        <li>
+          <strong>Email Quote Appender</strong> — automatically prepends
+          <code>&gt;</code> to every line for plain-text email replies, following
+          the convention used by the U-Boot and Linux kernel mailing lists.
+        </li>
+      </ul>
+
+      <h2>Open Source</h2>
+      <p>
+        All tools are open source under the MIT licence and hosted on GitHub:
+      </p>
+      <ul>
+        <li><a href="https://github.com/ngboonkhai/web.bit-manipulation-tool" target="_blank" rel="noopener">web.bit-manipulation-tool</a></li>
+        <li><a href="https://github.com/ngboonkhai/web.email-quote-appender" target="_blank" rel="noopener">web.email-quote-appender</a></li>
+        <li><a href="https://github.com/ngboonkhai/ngboonkhai.github.io" target="_blank" rel="noopener">ngboonkhai.github.io (this site)</a></li>
+      </ul>
+
+      <h2>Contact</h2>
+      <p>
+        Feel free to open an issue or submit a pull request on any of the
+        repositories above. Feedback and contributions are always welcome.
+      </p>
+    </main>
+  </div>
+
+  <script>
+    const hamburger    = document.getElementById('hamburger');
+    const sidebar      = document.getElementById('sidebar');
+    const overlay      = document.getElementById('overlay');
+    const sidebarClose = document.getElementById('sidebarClose');
+    hamburger.addEventListener('click',    () => { sidebar.classList.add('open');    overlay.classList.add('visible'); });
+    sidebarClose.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('visible'); });
+    overlay.addEventListener('click',      () => { sidebar.classList.remove('open'); overlay.classList.remove('visible'); });
+  </script>
+</body>
+</html>

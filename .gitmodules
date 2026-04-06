@@ -1,0 +1,6 @@
+[submodule "tools/web.bit-manipulation-tool"]
+	path = tools/web.bit-manipulation-tool
+	url = https://github.com/ngboonkhai/web.bit-manipulation-tool.git
+[submodule "tools/web.email-quote-appender"]
+	path = tools/web.email-quote-appender
+	url = https://github.com/ngboonkhai/web.email-quote-appender.git
