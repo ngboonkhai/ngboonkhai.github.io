@@ -41,8 +41,8 @@
         </a>
       </li>
       <li>
-        <a href="#" class="nav-item" data-view="regmap-tool">
-          <span class="nav-icon">📋</span> Agilex5 Register Map
+        <a href="#" class="nav-item" data-view="regmap-browse">
+          <span class="nav-icon">📋</span> Register Map
         </a>
       </li>
       <li class="nav-section-label">Info</li>
@@ -118,19 +118,19 @@
 
         <div class="tool-card">
           <div class="tool-card-icon">📋</div>
-          <h2>Agilex5 Register Map</h2>
+          <h2>Register Map</h2>
           <p>
-            Browse the Intel/Altera Agilex 5 HPS (Hard Processor System)
-            register map reference (rev C0, RC12). Look up register
-            addresses, bit-field descriptions, and reset values directly in
-            your browser.
+            Browse hardware register map references by vendor and device
+            family — starting with Intel/Altera Agilex® 5 HPS (Hard Processor
+            System). Look up register addresses, bit-field descriptions, and
+            reset values directly in your browser.
           </p>
           <ul>
-            <li>Full HPS register address map</li>
-            <li>Searchable within the embedded document</li>
+            <li>Browse by vendor, then device family</li>
+            <li>Full register address maps, searchable in-page</li>
             <li>No download required</li>
           </ul>
-          <button class="card-btn" data-view="regmap-tool">Open Tool →</button>
+          <button class="card-btn" data-view="regmap-browse">Open Tool →</button>
         </div>
 
       </div>
@@ -153,6 +153,16 @@
       </div>
     </main>
 
+    <!-- Register Map browse view (vendor → device picker) -->
+    <main class="content hidden" id="viewRegmapBrowse">
+      <nav class="breadcrumb" id="regmapBreadcrumb" aria-label="Breadcrumb"></nav>
+      <h1 id="regmapBrowseTitle">Register Map</h1>
+      <p class="lead" id="regmapBrowseLead">
+        Choose a vendor to browse its available register map references.
+      </p>
+      <div class="tool-cards" id="regmapCards"></div>
+    </main>
+
     <!-- Tool iframes (hidden until selected) -->
     <div class="iframe-view hidden" id="viewBitTool">
       <iframe src="tools/web.bit-manipulation-tool/index.html"
@@ -164,10 +174,13 @@
               title="Email Quote Appender"
               loading="lazy"></iframe>
     </div>
-    <div class="iframe-view hidden" id="viewRegmapTool">
-      <iframe src="tools/register_map/Altera/Agilex5/HPS_Reg_Map.AG5.revC0.RC12.html"
-              title="Agilex5 Register Map"
-              loading="lazy"></iframe>
+    <div class="iframe-view hidden" id="viewRegmapFrame">
+      <div class="iframe-toolbar">
+        <button type="button" class="back-btn" id="regmapBackBtn">← Back to Register Map</button>
+        <a href="#" id="regmapNewTabLink" target="_blank" rel="noopener" class="new-tab-link">Open in new tab ↗</a>
+      </div>
+      <div class="iframe-loading" id="regmapLoading">Loading register map… this file is large and may take a moment.</div>
+      <iframe id="regmapIframe" title="Register Map" loading="eager"></iframe>
     </div>
 
   </div><!-- /.main-wrapper -->
