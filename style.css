@@ -301,6 +301,30 @@ body {
 
 .new-tab-link:hover { text-decoration: underline; }
 
+.iframe-toolbar-disclaimer {
+  font-size: 0.82em;
+  color: #777;
+  flex: 1;
+  text-align: center;
+}
+
+.iframe-toolbar-disclaimer a {
+  color: var(--button-bg);
+}
+
+.disclaimer {
+  font-size: 0.85em;
+  color: #777;
+  background: #f9f9f9;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  line-height: 1.6;
+  max-width: 760px;
+}
+
+.disclaimer a { color: var(--button-bg); }
+
 .iframe-loading {
   position: absolute;
   top: 50%;
@@ -342,4 +366,13 @@ body {
   .content h1    { font-size: 1.5em; }
   .tool-cards    { grid-template-columns: 1fr; }
   .page-content  { padding: 20px 16px; }
+  .iframe-toolbar {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  .iframe-toolbar-disclaimer {
+    order: 3;
+    text-align: left;
+    flex: 1 0 100%;
+  }
 }

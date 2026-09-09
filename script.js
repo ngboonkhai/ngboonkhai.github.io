@@ -36,6 +36,7 @@ const registerMapCatalog = {
         icon: '🧩',
         desc: 'HPS (Hard Processor System) Register Address Map — rev C0, RC12',
         file: 'tools/register_map/Altera/Agilex5/HPS_Reg_Map.AG5.revC0.RC12.html',
+        source: 'https://docs.altera.com/v/u/resources/775831/agilextm-5-hps-register-map',
       },
     },
   },
@@ -90,6 +91,7 @@ const regmapIframe     = document.getElementById('regmapIframe');
 const regmapLoading    = document.getElementById('regmapLoading');
 const regmapBackBtn    = document.getElementById('regmapBackBtn');
 const regmapNewTabLink = document.getElementById('regmapNewTabLink');
+const regmapSourceLink = document.getElementById('regmapSourceLink');
 
 function makeCard({ icon, title, desc, onOpen }) {
   const card = document.createElement('div');
@@ -159,6 +161,7 @@ function openRegisterMap(vendorKey, deviceKey) {
 
   regmapBackBtn.dataset.vendor = vendorKey;
   regmapNewTabLink.href = device.file;
+  regmapSourceLink.href = device.source || device.file;
   regmapLoading.classList.remove('hidden');
 
   if (regmapIframe.src.endsWith(device.file)) {
@@ -183,9 +186,18 @@ regmapBackBtn.addEventListener('click', () => {
 
 // Restore last view from sessionStorage
 const saved = sessionStorage.getItem('activeView');
-if (saved === 'regmap-browse') { renderRegmapVendors(); showView('regmap-browse'); }
-else if (saved && views[saved]) showView(saved);
-else showView('home');
+// A URL hash (e.g. from about.html / privacy.html nav links) takes
+// priority over the remembered session view, so links like
+// index.html#regmap-browse always land on the right tool.
+const hashView = location.hash ? location.hash.slice(1) : '';
+const initialView = (hashView && views[hashView]) ? hashView
+  : (saved && views[saved]) ? saved
+  : 'home';
+
+if (hashView && views[hashView]) history.replaceState(null, '', location.pathname + location.search);
+
+if (initialView === 'regmap-browse') { renderRegmapVendors(); showView('regmap-browse'); }
+else showView(initialView);
 
 // Persist active view
 document.querySelectorAll('[data-view]').forEach(el => {

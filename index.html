@@ -161,6 +161,17 @@
         Choose a vendor to browse its available register map references.
       </p>
       <div class="tool-cards" id="regmapCards"></div>
+      <p class="disclaimer">
+        <strong>Disclaimer:</strong> Register map data shown here is sourced
+        from each vendor's official documentation and is provided as-is for
+        convenience only. We take no responsibility for the accuracy,
+        completeness, or currency of this data — you are solely responsible
+        for verifying it against the official source before relying on it.
+        For the Agilex® 5 HPS register map, the original document is
+        published by Altera at
+        <a href="https://docs.altera.com/v/u/resources/775831/agilextm-5-hps-register-map" target="_blank" rel="noopener">
+          docs.altera.com</a>, where you can also download it directly.
+      </p>
     </main>
 
     <!-- Tool iframes (hidden until selected) -->
@@ -177,6 +188,10 @@
     <div class="iframe-view hidden" id="viewRegmapFrame">
       <div class="iframe-toolbar">
         <button type="button" class="back-btn" id="regmapBackBtn">← Back to Register Map</button>
+        <span class="iframe-toolbar-disclaimer">
+          Data provided as-is, no responsibility taken — see
+          <a href="#" id="regmapSourceLink" target="_blank" rel="noopener">official source</a>.
+        </span>
         <a href="#" id="regmapNewTabLink" target="_blank" rel="noopener" class="new-tab-link">Open in new tab ↗</a>
       </div>
       <div class="iframe-loading" id="regmapLoading">Loading register map… this file is large and may take a moment.</div>
