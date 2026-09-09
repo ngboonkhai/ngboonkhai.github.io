@@ -61,6 +61,23 @@ function showView(key) {
 function openSidebar()  { sidebar.classList.add('open');  overlay.classList.add('visible'); }
 function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
 
+// ── Collapse sidebar to icons-only (desktop) ────────────────────
+const sidebarCollapse = document.getElementById('sidebarCollapse');
+
+function applyCollapsedState() {
+  const collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+  document.body.classList.toggle('sidebar-collapsed', collapsed);
+  sidebarCollapse.textContent = collapsed ? '»' : '«';
+}
+
+sidebarCollapse.addEventListener('click', () => {
+  const collapsed = document.body.classList.toggle('sidebar-collapsed');
+  localStorage.setItem('sidebarCollapsed', collapsed);
+  sidebarCollapse.textContent = collapsed ? '»' : '«';
+});
+
+applyCollapsedState();
+
 hamburger.addEventListener('click', openSidebar);
 sidebarClose.addEventListener('click', closeSidebar);
 overlay.addEventListener('click', closeSidebar);

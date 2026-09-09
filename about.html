@@ -16,17 +16,18 @@
     <div class="sidebar-header">
       <span class="sidebar-logo">🛠️</span>
       <span class="sidebar-title">ngboonkhai</span>
+      <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse menu" title="Collapse menu">«</button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
     </div>
     <ul class="nav-list">
-      <li><a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a></li>
+      <li><a href="index.html" class="nav-item" title="Home"><span class="nav-icon">🏠</span><span class="nav-label"> Home</span></a></li>
       <li class="nav-section-label">Tools</li>
-      <li><a href="index.html#bit-tool" class="nav-item"><span class="nav-icon">🧮</span> Bit Manipulation</a></li>
-      <li><a href="index.html#quote-tool" class="nav-item"><span class="nav-icon">✉️</span> Email Quote Appender</a></li>
-      <li><a href="index.html#regmap-browse" class="nav-item"><span class="nav-icon">📋</span> Register Map</a></li>
+      <li><a href="index.html#bit-tool" class="nav-item" title="Bit Manipulation"><span class="nav-icon">🧮</span><span class="nav-label"> Bit Manipulation</span></a></li>
+      <li><a href="index.html#quote-tool" class="nav-item" title="Email Quote Appender"><span class="nav-icon">✉️</span><span class="nav-label"> Email Quote Appender</span></a></li>
+      <li><a href="index.html#regmap-browse" class="nav-item" title="Register Map"><span class="nav-icon">📋</span><span class="nav-label"> Register Map</span></a></li>
       <li class="nav-section-label">Info</li>
-      <li><a href="about.html" class="nav-item active"><span class="nav-icon">👤</span> About</a></li>
-      <li><a href="privacy.html" class="nav-item"><span class="nav-icon">🔒</span> Privacy Policy</a></li>
+      <li><a href="about.html" class="nav-item active" title="About"><span class="nav-icon">👤</span><span class="nav-label"> About</span></a></li>
+      <li><a href="privacy.html" class="nav-item" title="Privacy Policy"><span class="nav-icon">🔒</span><span class="nav-label"> Privacy Policy</span></a></li>
     </ul>
   </nav>
 
@@ -97,6 +98,19 @@
     hamburger.addEventListener('click',    () => { sidebar.classList.add('open');    overlay.classList.add('visible'); });
     sidebarClose.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('visible'); });
     overlay.addEventListener('click',      () => { sidebar.classList.remove('open'); overlay.classList.remove('visible'); });
+
+    const sidebarCollapse = document.getElementById('sidebarCollapse');
+    function applyCollapsedState() {
+      const collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+      document.body.classList.toggle('sidebar-collapsed', collapsed);
+      sidebarCollapse.textContent = collapsed ? '»' : '«';
+    }
+    sidebarCollapse.addEventListener('click', () => {
+      const collapsed = document.body.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('sidebarCollapsed', collapsed);
+      sidebarCollapse.textContent = collapsed ? '»' : '«';
+    });
+    applyCollapsedState();
   </script>
 </body>
 </html>
