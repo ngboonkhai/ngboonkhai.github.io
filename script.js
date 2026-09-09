@@ -12,11 +12,13 @@ const topbarTitle  = document.getElementById('topbarTitle');
 const viewHome     = document.getElementById('viewHome');
 const viewBitTool  = document.getElementById('viewBitTool');
 const viewQuoteTool= document.getElementById('viewQuoteTool');
+const viewRegmapTool = document.getElementById('viewRegmapTool');
 
 const views = {
   home:       { el: viewHome,      title: 'Developer Tools' },
   'bit-tool': { el: viewBitTool,   title: '🧮 Bit Manipulation Tool' },
   'quote-tool':{ el: viewQuoteTool, title: '✉️ Email Quote Appender' },
+  'regmap-tool':{ el: viewRegmapTool, title: '📋 Agilex5 Register Map' },
 };
 
 function showView(key) {

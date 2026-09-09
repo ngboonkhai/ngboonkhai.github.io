@@ -40,6 +40,11 @@
           <span class="nav-icon">✉️</span> Email Quote Appender
         </a>
       </li>
+      <li>
+        <a href="#" class="nav-item" data-view="regmap-tool">
+          <span class="nav-icon">📋</span> Agilex5 Register Map
+        </a>
+      </li>
       <li class="nav-section-label">Info</li>
       <li>
         <a href="about.html" class="nav-item">
@@ -111,6 +116,23 @@
           <button class="card-btn" data-view="quote-tool">Open Tool →</button>
         </div>
 
+        <div class="tool-card">
+          <div class="tool-card-icon">📋</div>
+          <h2>Agilex5 Register Map</h2>
+          <p>
+            Browse the Intel/Altera Agilex 5 HPS (Hard Processor System)
+            register map reference (rev C0, RC12). Look up register
+            addresses, bit-field descriptions, and reset values directly in
+            your browser.
+          </p>
+          <ul>
+            <li>Full HPS register address map</li>
+            <li>Searchable within the embedded document</li>
+            <li>No download required</li>
+          </ul>
+          <button class="card-btn" data-view="regmap-tool">Open Tool →</button>
+        </div>
+
       </div>
 
       <div class="tool-info">
@@ -140,6 +162,11 @@
     <div class="iframe-view hidden" id="viewQuoteTool">
       <iframe src="tools/web.email-quote-appender/index.html"
               title="Email Quote Appender"
+              loading="lazy"></iframe>
+    </div>
+    <div class="iframe-view hidden" id="viewRegmapTool">
+      <iframe src="tools/register_map/Altera/Agilex5/HPS_Reg_Map.AG5.revC0.RC12.html"
+              title="Agilex5 Register Map"
               loading="lazy"></iframe>
     </div>
 
