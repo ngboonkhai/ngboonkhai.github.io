@@ -38,6 +38,13 @@ const registerMapCatalog = {
         file: 'tools/register_map/Altera/Agilex5/HPS_Reg_Map.AG5.revC0.RC12.html',
         source: 'https://docs.altera.com/v/u/resources/775831/agilextm-5-hps-register-map',
       },
+      agilex7: {
+        label: 'Agilex® 7',
+        icon: '🧩',
+        desc: 'HPS (Hard Processor System) Register Address Map — rev X0, RC26',
+        file: 'tools/register_map/Altera/Agilex7/HPS_Reg_Map.AG7.revX0.RC26.html',
+        source: 'https://docs.altera.com/v/u/resources/747593/agilex-7-fpga-hard-processor-system-hps-address-map-and-definitions-register-map',
+      },
     },
   },
 };
