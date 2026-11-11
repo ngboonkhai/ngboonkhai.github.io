@@ -8,7 +8,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ngboonkhai – Developer Tools</title>
-  <meta name="description" content="Free browser-based developer tools by ngboonkhai — bit manipulation, email quote appender, and more.">
+  <meta name="description" content="Free browser-based developer tools by ngboonkhai — bit manipulation, email quote appender, Markdown editor, and more.">
   <link rel="stylesheet" href="style.css">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5171079448310757"
     crossorigin="anonymous"></script>
@@ -39,6 +39,11 @@
       <li>
         <a href="#" class="nav-item" data-view="quote-tool" title="Email Quote Appender">
           <span class="nav-icon">✉️</span><span class="nav-label"> Email Quote Appender</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-item" data-view="markdown-tool" title="Markdown Editor">
+          <span class="nav-icon">📝</span><span class="nav-label"> Markdown Editor</span>
         </a>
       </li>
       <li>
@@ -118,6 +123,22 @@
         </div>
 
         <div class="tool-card">
+          <div class="tool-card-icon">📝</div>
+          <h2>Markdown Editor</h2>
+          <p>
+            Write Markdown on the left and see a live rendered preview on the
+            right. Handy for README files, commit messages, and documentation.
+            Your draft is saved locally in your browser.
+          </p>
+          <ul>
+            <li>Toolbar and shortcuts (Ctrl+B / I / K)</li>
+            <li>Tables, task lists, and code blocks</li>
+            <li>Copy as Markdown or HTML, or download .md</li>
+          </ul>
+          <button class="card-btn" data-view="markdown-tool">Open Tool →</button>
+        </div>
+
+        <div class="tool-card">
           <div class="tool-card-icon">📋</div>
           <h2>Register Map</h2>
           <p>
@@ -184,6 +205,11 @@
     <div class="iframe-view hidden" id="viewQuoteTool">
       <iframe src="tools/web.email-quote-appender/index.html"
               title="Email Quote Appender"
+              loading="lazy"></iframe>
+    </div>
+    <div class="iframe-view hidden" id="viewMarkdownTool">
+      <iframe src="tools/markdown-editor/index.html"
+              title="Markdown Editor"
               loading="lazy"></iframe>
     </div>
     <div class="iframe-view hidden" id="viewRegmapFrame">

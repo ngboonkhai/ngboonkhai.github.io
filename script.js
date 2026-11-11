@@ -12,6 +12,7 @@ const topbarTitle  = document.getElementById('topbarTitle');
 const viewHome        = document.getElementById('viewHome');
 const viewBitTool     = document.getElementById('viewBitTool');
 const viewQuoteTool   = document.getElementById('viewQuoteTool');
+const viewMarkdownTool= document.getElementById('viewMarkdownTool');
 const viewRegmapBrowse= document.getElementById('viewRegmapBrowse');
 const viewRegmapFrame = document.getElementById('viewRegmapFrame');
 
@@ -19,6 +20,7 @@ const views = {
   home:          { el: viewHome,         title: 'Developer Tools' },
   'bit-tool':    { el: viewBitTool,      title: '🧮 Bit Manipulation Tool' },
   'quote-tool':  { el: viewQuoteTool,    title: '✉️ Email Quote Appender' },
+  'markdown-tool':{ el: viewMarkdownTool, title: '📝 Markdown Editor' },
   'regmap-browse':{ el: viewRegmapBrowse, title: '📋 Register Map' },
   'regmap-frame': { el: viewRegmapFrame,  title: '📋 Register Map' },
 };
