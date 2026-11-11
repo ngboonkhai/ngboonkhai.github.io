@@ -1,0 +1,352 @@
+<!--
+  MIT License
+  Copyright (c) 2025 ngboonkhai
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diff Tool</title>
+<style>
+  :root { --bg:#f4f6fb; --panel:#fff; --border:#d5dae6; --accent:#3b5bdb; --text:#1c2333; --muted:#6b7490;
+          --add-bg:#e6ffec; --add-strong:#abf2bc; --del-bg:#ffebe9; --del-strong:#ffc1ba; --chg-gutter:#f6f8fa; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; background: var(--bg); color: var(--text);
+         font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 8px 12px;
+             background: var(--panel); border-bottom: 1px solid var(--border); font-size: 13px; }
+  .toolbar button, .file-btn { padding: 5px 10px; border: 1px solid var(--border); background: #fff; color: var(--text);
+                    border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .toolbar button:hover, .file-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .toolbar label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+  .toolbar .sep { width: 1px; height: 22px; background: var(--border); }
+  .toolbar .spacer { flex: 1; }
+  .seg { display: inline-flex; }
+  .seg button { border-radius: 0; margin-left: -1px; }
+  .seg button:first-child { border-radius: 6px 0 0 6px; margin-left: 0; }
+  .seg button:last-child { border-radius: 0 6px 6px 0; }
+  .seg button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .seg button.on:hover { color: #fff; }
+
+  .inputs { display: grid; grid-template-columns: 1fr 1fr; height: 32%; min-height: 120px; border-bottom: 1px solid var(--border); }
+  .inputs.collapsed { display: none; }
+  .in-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .in-pane + .in-pane { border-left: 1px solid var(--border); }
+  .pane-title { display: flex; align-items: center; justify-content: space-between; padding: 4px 12px; font-size: 12px;
+                text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: var(--panel);
+                border-bottom: 1px solid var(--border); }
+  .file-btn { text-transform: none; letter-spacing: 0; font-size: 12px; padding: 2px 8px; }
+  .file-btn input { display: none; }
+  textarea { flex: 1; width: 100%; border: 0; resize: none; padding: 10px 12px; outline: none; white-space: pre;
+             font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #fff; color: var(--text); tab-size: 4; }
+
+  .summary { padding: 6px 12px; font-size: 13px; background: var(--panel); border-bottom: 1px solid var(--border); color: var(--muted); }
+  .summary .add { color: #1a7f37; font-weight: 600; }
+  .summary .del { color: #cf222e; font-weight: 600; }
+  .summary .same { color: #1a7f37; font-weight: 600; }
+  #result { flex: 1; overflow: auto; background: #fff; min-height: 0; }
+  table.diff { border-collapse: collapse; width: 100%; table-layout: fixed;
+               font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  table.diff td { padding: 0 8px; vertical-align: top; white-space: pre-wrap; overflow-wrap: anywhere; }
+  table.diff td.no { width: 48px; text-align: right; color: var(--muted); background: var(--chg-gutter); user-select: none; padding: 0 6px; }
+  table.diff td.mk { width: 22px; text-align: center; color: var(--muted); user-select: none; padding: 0; }
+  table.diff td.add { background: var(--add-bg); }
+  table.diff td.del { background: var(--del-bg); }
+  table.diff td.empty { background: var(--chg-gutter); }
+  table.diff td.no.add { background: var(--add-strong); }
+  table.diff td.no.del { background: var(--del-strong); }
+  table.diff td.l { border-right: 1px solid var(--border); }
+  table.diff mark.a { background: var(--add-strong); color: inherit; border-radius: 2px; }
+  table.diff mark.d { background: var(--del-strong); color: inherit; border-radius: 2px; }
+  table.diff tr.skip td { background: #ddf4ff; color: #0550ae; text-align: center; font-style: italic; padding: 3px; cursor: pointer; }
+  .placeholder { padding: 24px; color: var(--muted); text-align: center; }
+  @media (max-width: 720px) { .inputs { grid-template-columns: 1fr; height: 45%; } .in-pane + .in-pane { border-left: 0; border-top: 1px solid var(--border); } }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="seg" role="group" aria-label="View mode">
+    <button id="vSplit" class="on">Side by side</button>
+    <button id="vUnified">Unified</button>
+  </span>
+  <span class="sep"></span>
+  <label><input type="checkbox" id="optWs"> Ignore whitespace</label>
+  <label><input type="checkbox" id="optCase"> Ignore case</label>
+  <label><input type="checkbox" id="optCtx"> Changes only</label>
+  <span class="spacer"></span>
+  <button id="swap" title="Swap original and modified">⇄ Swap</button>
+  <button id="toggleInputs">Hide inputs</button>
+  <button id="copyPatch">Copy unified diff</button>
+  <button id="clear">Clear</button>
+</div>
+
+<div class="inputs" id="inputs">
+  <div class="in-pane">
+    <div class="pane-title"><span>Original</span><label class="file-btn">Open file…<input type="file" id="fileA"></label></div>
+    <textarea id="taA" spellcheck="false" placeholder="Paste the original text here…"></textarea>
+  </div>
+  <div class="in-pane">
+    <div class="pane-title"><span>Modified</span><label class="file-btn">Open file…<input type="file" id="fileB"></label></div>
+    <textarea id="taB" spellcheck="false" placeholder="Paste the modified text here…"></textarea>
+  </div>
+</div>
+
+<div class="summary" id="summary"></div>
+<div id="result"></div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const taA = $('taA'), taB = $('taB'), result = $('result'), summary = $('summary');
+  const optWs = $('optWs'), optCase = $('optCase'), optCtx = $('optCtx');
+  const CONTEXT = 3;
+  const MAX_CELLS = 16e6; // cap on the LCS table size to keep the page responsive
+  let mode = 'split';
+  let lastOps = [];
+
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const toLines = t => { if (!t) return []; const l = t.replace(/\r\n?/g, '\n').split('\n'); if (l[l.length - 1] === '') l.pop(); return l; };
+
+  function keyOf(s) {
+    if (optWs.checked) s = s.trim().replace(/\s+/g, ' ');
+    if (optCase.checked) s = s.toLowerCase();
+    return s;
+  }
+
+  // Generic LCS diff over two key arrays. Returns [{t:'eq'|'del'|'add', i, j}] with indexes into a/b.
+  function diffSeq(ka, kb) {
+    const n = ka.length, m = kb.length;
+    let s = 0;
+    while (s < n && s < m && ka[s] === kb[s]) s++;
+    let e = 0;
+    while (e < n - s && e < m - s && ka[n - 1 - e] === kb[m - 1 - e]) e++;
+    const ops = [];
+    for (let k = 0; k < s; k++) ops.push({ t: 'eq', i: k, j: k });
+
+    const N = n - s - e, M = m - s - e;
+    if (N && M && N * M > MAX_CELLS) {
+      for (let k = 0; k < N; k++) ops.push({ t: 'del', i: s + k });
+      for (let k = 0; k < M; k++) ops.push({ t: 'add', j: s + k });
+    } else if (!N || !M) {
+      for (let k = 0; k < N; k++) ops.push({ t: 'del', i: s + k });
+      for (let k = 0; k < M; k++) ops.push({ t: 'add', j: s + k });
+    } else {
+      const W = M + 1;
+      const dp = new Uint32Array((N + 1) * W);
+      for (let x = N - 1; x >= 0; x--) {
+        for (let y = M - 1; y >= 0; y--) {
+          dp[x * W + y] = ka[s + x] === kb[s + y] ? dp[(x + 1) * W + y + 1] + 1
+            : Math.max(dp[(x + 1) * W + y], dp[x * W + y + 1]);
+        }
+      }
+      let x = 0, y = 0;
+      while (x < N && y < M) {
+        if (ka[s + x] === kb[s + y]) { ops.push({ t: 'eq', i: s + x, j: s + y }); x++; y++; }
+        else if (dp[(x + 1) * W + y] >= dp[x * W + y + 1]) ops.push({ t: 'del', i: s + x++ });
+        else ops.push({ t: 'add', j: s + y++ });
+      }
+      while (x < N) ops.push({ t: 'del', i: s + x++ });
+      while (y < M) ops.push({ t: 'add', j: s + y++ });
+    }
+    for (let k = e; k > 0; k--) ops.push({ t: 'eq', i: n - k, j: m - k });
+    return ops;
+  }
+
+  // Word-level highlight for a changed line pair.
+  function wordDiff(a, b) {
+    const tok = s => s.match(/\s+|\w+|[^\w\s]/g) || [];
+    const ta = tok(a), tb = tok(b);
+    if (ta.length * tb.length > 250000) return [esc(a), esc(b)];
+    const ops = diffSeq(ta, tb);
+    let l = '', r = '';
+    const flush = (arr, cls) => arr.length ? '<mark class="' + cls + '">' + esc(arr.join('')) + '</mark>' : '';
+    let dels = [], adds = [];
+    const settle = () => { l += flush(dels, 'd'); r += flush(adds, 'a'); dels = []; adds = []; };
+    ops.forEach(o => {
+      if (o.t === 'eq') { settle(); l += esc(ta[o.i]); r += esc(tb[o.j]); }
+      else if (o.t === 'del') dels.push(ta[o.i]);
+      else adds.push(tb[o.j]);
+    });
+    settle();
+    return [l, r];
+  }
+
+  // Turn ops into display rows, pairing deleted/added lines inside each change block.
+  function buildRows(ops, A, B) {
+    const rows = [];
+    let k = 0;
+    while (k < ops.length) {
+      if (ops[k].t === 'eq') {
+        rows.push({ t: 'eq', l: esc(A[ops[k].i]), r: esc(B[ops[k].j]), ln: ops[k].i + 1, rn: ops[k].j + 1 });
+        k++; continue;
+      }
+      const dels = [], adds = [];
+      while (k < ops.length && ops[k].t !== 'eq') { (ops[k].t === 'del' ? dels : adds).push(ops[k]); k++; }
+      const p = Math.min(dels.length, adds.length);
+      for (let q = 0; q < p; q++) {
+        const [l, r] = wordDiff(A[dels[q].i], B[adds[q].j]);
+        rows.push({ t: 'chg', l, r, ln: dels[q].i + 1, rn: adds[q].j + 1 });
+      }
+      for (let q = p; q < dels.length; q++) rows.push({ t: 'del', l: esc(A[dels[q].i]), ln: dels[q].i + 1 });
+      for (let q = p; q < adds.length; q++) rows.push({ t: 'add', r: esc(B[adds[q].j]), rn: adds[q].j + 1 });
+    }
+    return rows;
+  }
+
+  // Collapse long runs of unchanged rows into a clickable placeholder.
+  function collapse(rows) {
+    if (!optCtx.checked) return rows.map(r => ({ row: r }));
+    const keep = new Array(rows.length).fill(false);
+    rows.forEach((r, i) => {
+      if (r.t === 'eq') return;
+      for (let d = -CONTEXT; d <= CONTEXT; d++) if (rows[i + d]) keep[i + d] = true;
+    });
+    const out = [];
+    for (let i = 0; i < rows.length; i++) {
+      if (keep[i]) { out.push({ row: rows[i] }); continue; }
+      let j = i;
+      while (j < rows.length && !keep[j]) j++;
+      out.push({ skip: rows.slice(i, j) });
+      i = j - 1;
+    }
+    return out;
+  }
+
+  const cell = (cls, no, mk, html) =>
+    '<td class="no ' + cls + '">' + (no || '') + '</td><td class="mk ' + cls + '">' + mk + '</td><td class="' + cls + '">' + (html || '') + '</td>';
+
+  function rowHtml(r) {
+    if (mode === 'split') {
+      let left, right;
+      if (r.t === 'eq') { left = cell('', r.ln, '', r.l); right = cell('', r.rn, '', r.r); }
+      else if (r.t === 'chg') { left = cell('del', r.ln, '−', r.l); right = cell('add', r.rn, '+', r.r); }
+      else if (r.t === 'del') { left = cell('del', r.ln, '−', r.l); right = cell('empty', '', '', ''); }
+      else { left = cell('empty', '', '', ''); right = cell('add', r.rn, '+', r.r); }
+      return '<tr>' + left + right + '</tr>';
+    }
+    // Unified: changed pairs expand into a removed line followed by an added line.
+    const u = (cls, ln, rn, mk, html) =>
+      '<tr><td class="no ' + cls + '">' + (ln || '') + '</td><td class="no ' + cls + '">' + (rn || '') + '</td><td class="mk ' + cls + '">' + mk + '</td><td class="' + cls + '">' + html + '</td></tr>';
+    if (r.t === 'eq') return u('', r.ln, r.rn, '', r.l);
+    if (r.t === 'chg') return u('del', r.ln, '', '−', r.l) + u('add', '', r.rn, '+', r.r);
+    if (r.t === 'del') return u('del', r.ln, '', '−', r.l);
+    return u('add', '', r.rn, '+', r.r);
+  }
+
+  function unifiedPatch(ops, A, B) {
+    const changed = [];
+    ops.forEach((o, i) => { if (o.t !== 'eq') changed.push(i); });
+    if (!changed.length) return '';
+    const hunks = [];
+    changed.forEach(i => {
+      const s = Math.max(0, i - CONTEXT), e = Math.min(ops.length - 1, i + CONTEXT);
+      const last = hunks[hunks.length - 1];
+      if (last && s <= last[1] + 1) last[1] = e; else hunks.push([s, e]);
+    });
+    const out = ['--- original', '+++ modified'];
+    hunks.forEach(([s, e]) => {
+      let aBefore = 0, bBefore = 0, aCnt = 0, bCnt = 0;
+      for (let k = 0; k < s; k++) { if (ops[k].t !== 'add') aBefore++; if (ops[k].t !== 'del') bBefore++; }
+      const body = [];
+      for (let k = s; k <= e; k++) {
+        const o = ops[k];
+        if (o.t === 'eq') { body.push(' ' + A[o.i]); aCnt++; bCnt++; }
+        else if (o.t === 'del') { body.push('-' + A[o.i]); aCnt++; }
+        else { body.push('+' + B[o.j]); bCnt++; }
+      }
+      out.push('@@ -' + (aCnt ? aBefore + 1 : aBefore) + ',' + aCnt + ' +' + (bCnt ? bBefore + 1 : bBefore) + ',' + bCnt + ' @@');
+      out.push(...body);
+    });
+    return out.join('\n') + '\n';
+  }
+
+  function compare() {
+    const A = toLines(taA.value), B = toLines(taB.value);
+    if (!A.length && !B.length) {
+      lastOps = [];
+      summary.textContent = '';
+      result.innerHTML = '<div class="placeholder">Paste or open two texts above to compare them.</div>';
+      return;
+    }
+    const ops = diffSeq(A.map(keyOf), B.map(keyOf));
+    lastOps = { ops, A, B };
+    const adds = ops.filter(o => o.t === 'add').length, dels = ops.filter(o => o.t === 'del').length;
+
+    if (!adds && !dels) {
+      summary.innerHTML = '<span class="same">✓ No differences</span>' + (A.join('\n') !== B.join('\n') ? ' (ignoring the selected options)' : '');
+    } else {
+      summary.innerHTML = '<span class="add">+' + adds + '</span> added, <span class="del">−' + dels + '</span> removed';
+    }
+
+    const items = collapse(buildRows(ops, A, B));
+    const cols = mode === 'split' ? 6 : 4;
+    const colgroup = mode === 'split' ? '<colgroup><col style="width:48px"><col style="width:22px"><col><col style="width:48px"><col style="width:22px"><col></colgroup>'
+      : '<colgroup><col style="width:48px"><col style="width:48px"><col style="width:22px"><col></colgroup>';
+    const body = items.map((it, idx) => it.row ? rowHtml(it.row)
+      : '<tr class="skip" data-skip="' + idx + '"><td colspan="' + cols + '">⋯ ' + it.skip.length + ' unchanged line' + (it.skip.length === 1 ? '' : 's') + ' (click to expand)</td></tr>').join('');
+    result.innerHTML = '<table class="diff">' + colgroup + '<tbody>' + body + '</tbody></table>';
+
+    result.querySelectorAll('tr.skip').forEach(tr => tr.addEventListener('click', () => {
+      tr.outerHTML = items[+tr.dataset.skip].skip.map(rowHtml).join('');
+    }));
+    if (mode === 'split') result.querySelectorAll('tr').forEach(tr => { const c = tr.children[2]; if (c) c.classList.add('l'); });
+  }
+
+  let timer;
+  const schedule = () => { clearTimeout(timer); timer = setTimeout(compare, 150); };
+
+  [taA, taB].forEach(t => t.addEventListener('input', schedule));
+  [optWs, optCase, optCtx].forEach(o => o.addEventListener('change', compare));
+
+  function setMode(m) {
+    mode = m;
+    $('vSplit').classList.toggle('on', m === 'split');
+    $('vUnified').classList.toggle('on', m === 'unified');
+    compare();
+  }
+  $('vSplit').addEventListener('click', () => setMode('split'));
+  $('vUnified').addEventListener('click', () => setMode('unified'));
+
+  $('swap').addEventListener('click', () => { const t = taA.value; taA.value = taB.value; taB.value = t; compare(); });
+  $('clear').addEventListener('click', () => { taA.value = ''; taB.value = ''; compare(); });
+  $('toggleInputs').addEventListener('click', e => {
+    const c = $('inputs').classList.toggle('collapsed');
+    e.currentTarget.textContent = c ? 'Show inputs' : 'Hide inputs';
+  });
+
+  $('copyPatch').addEventListener('click', async e => {
+    const btn = e.currentTarget, old = btn.textContent;
+    const patch = lastOps.ops ? unifiedPatch(lastOps.ops, lastOps.A, lastOps.B) : '';
+    if (!patch) { btn.textContent = 'Nothing to copy'; setTimeout(() => { btn.textContent = old; }, 1200); return; }
+    try { await navigator.clipboard.writeText(patch); }
+    catch (err) {
+      const ta = document.createElement('textarea');
+      ta.value = patch; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+    }
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => { btn.textContent = old; }, 1200);
+  });
+
+  function loadFile(input, target) {
+    input.addEventListener('change', () => {
+      const f = input.files[0];
+      if (!f) return;
+      const rd = new FileReader();
+      rd.onload = () => { target.value = rd.result; input.value = ''; compare(); };
+      rd.readAsText(f);
+    });
+  }
+  loadFile($('fileA'), taA);
+  loadFile($('fileB'), taB);
+
+  taA.value = 'The quick brown fox\njumps over the lazy dog.\n\nLine to remove\nSame ending\n';
+  taB.value = 'The quick red fox\njumps over the lazy dog!\n\nA brand new line\nSame ending\n';
+  compare();
+})();
+</script>
+</body>
+</html>
