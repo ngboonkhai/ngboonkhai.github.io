@@ -23,7 +23,17 @@
   .toolbar .spacer { flex: 1; }
   .toolbar .primary { background: var(--accent); color: #fff; border-color: var(--accent); }
   .toolbar .primary:hover { color: #fff; opacity: .9; }
-  .panes { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: 0; }
+  .panes { flex: 1; display: grid; grid-template-columns: 220px 1fr 1fr; min-height: 0; }
+  .panes.no-outline { grid-template-columns: 1fr 1fr; }
+  .panes.no-outline #outlinePane { display: none; }
+  #outline { flex: 1; overflow: auto; padding: 6px 0; background: var(--panel); margin: 0; list-style: none; font-size: 13px; }
+  #outline li a { display: block; padding: 4px 12px; color: var(--text); text-decoration: none; cursor: pointer;
+                  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid transparent; }
+  #outline li a:hover { background: #eef1f8; }
+  #outline li a.active { border-left-color: var(--accent); background: #eef1f8; color: var(--accent); font-weight: 600; }
+  #outline li.lvl-1 a { font-weight: 600; }
+  #outline .empty { padding: 10px 12px; color: var(--muted); }
+  .toolbar button.on { border-color: var(--accent); color: var(--accent); }
   .pane { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
   .pane + .pane { border-left: 1px solid var(--border); }
   .pane-title { padding: 6px 12px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em;
@@ -48,7 +58,9 @@
   #preview li.task { list-style: none; margin-left: -1.2em; }
   .status { padding: 4px 12px; font-size: 12px; color: var(--muted); background: var(--panel); border-top: 1px solid var(--border); }
   @media (max-width: 720px) {
-    .panes { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+    .panes, .panes.no-outline { grid-template-columns: 1fr; grid-template-rows: auto 1fr 1fr; }
+    .panes.no-outline { grid-template-rows: 1fr 1fr; }
+    #outlinePane { max-height: 140px; }
     .pane + .pane { border-left: 0; border-top: 1px solid var(--border); }
   }
 </style>
@@ -73,6 +85,8 @@
   <button data-act="link" title="Link (Ctrl+K)">🔗</button>
   <button data-act="table" title="Insert table">▦ Table</button>
   <button data-act="hr" title="Horizontal rule">―</button>
+  <span class="sep"></span>
+  <button id="toggleOutline" class="on" title="Show/hide outline">☰ Outline</button>
   <span class="spacer"></span>
   <button id="copyMd">Copy Markdown</button>
   <button id="copyHtml">Copy HTML</button>
@@ -80,7 +94,11 @@
   <button id="clear">Clear</button>
 </div>
 
-<div class="panes">
+<div class="panes" id="panes">
+  <div class="pane" id="outlinePane">
+    <div class="pane-title">Outline</div>
+    <ul id="outline"></ul>
+  </div>
   <div class="pane">
     <div class="pane-title">Markdown</div>
     <textarea id="editor" spellcheck="false" placeholder="Type or paste Markdown here…"></textarea>
@@ -144,7 +162,7 @@
     return row.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim());
   }
 
-  function render(md) {
+  function render(md, nested) {
     const lines = md.replace(/\r\n?/g, '\n').split('\n');
     const out = [];
     let i = 0;
@@ -186,12 +204,15 @@
         continue;
       }
       const h = line.match(/^(#{1,6})\s+(.*?)\s*#*\s*$/);
-      if (h) { out.push('<h' + h[1].length + '>' + inline(h[2]) + '</h' + h[1].length + '>'); i++; continue; }
+      if (h) {
+        out.push('<h' + h[1].length + (nested ? '' : ' data-line="' + i + '"') + '>' + inline(h[2]) + '</h' + h[1].length + '>');
+        i++; continue;
+      }
       if (/^\s*([-*_]\s*){3,}$/.test(line)) { out.push('<hr>'); i++; continue; }
       if (/^>/.test(line)) {
         const buf = [];
         while (i < lines.length && /^>/.test(lines[i])) buf.push(lines[i++].replace(/^>\s?/, ''));
-        out.push('<blockquote>' + render(buf.join('\n')) + '</blockquote>');
+        out.push('<blockquote>' + render(buf.join('\n'), true) + '</blockquote>');
         continue;
       }
       if (/^\s*([-*+]|\d+\.)\s+/.test(line)) {
@@ -217,9 +238,71 @@
     return out.join('\n');
   }
 
+  // ── Outline ──
+  const outline = document.getElementById('outline');
+  const panes = document.getElementById('panes');
+  let headings = [];
+
+  function buildOutline() {
+    headings = Array.from(preview.querySelectorAll('h1[data-line],h2[data-line],h3[data-line],h4[data-line],h5[data-line],h6[data-line]'));
+    outline.innerHTML = '';
+    if (!headings.length) {
+      outline.innerHTML = '<li class="empty">No headings yet. Start a line with # to add one.</li>';
+      return;
+    }
+    const min = Math.min(...headings.map(h => +h.tagName[1]));
+    headings.forEach((h, n) => {
+      const lvl = +h.tagName[1];
+      const li = document.createElement('li');
+      li.className = 'lvl-' + lvl;
+      const a = document.createElement('a');
+      a.textContent = h.textContent;
+      a.title = h.textContent;
+      a.dataset.idx = n;
+      a.style.paddingLeft = (12 + (lvl - min) * 14) + 'px';
+      li.appendChild(a);
+      outline.appendChild(li);
+    });
+    markActive();
+  }
+
+  function markActive() {
+    if (!headings.length) return;
+    const top = preview.getBoundingClientRect().top + 8;
+    let cur = 0;
+    headings.forEach((h, n) => { if (h.getBoundingClientRect().top <= top) cur = n; });
+    outline.querySelectorAll('a').forEach(a => a.classList.toggle('active', +a.dataset.idx === cur));
+  }
+
+  outline.addEventListener('click', e => {
+    const a = e.target.closest('a[data-idx]');
+    if (!a) return;
+    const h = headings[+a.dataset.idx];
+    if (!h) return;
+    preview.scrollTo({ top: preview.scrollTop + h.getBoundingClientRect().top - preview.getBoundingClientRect().top - 8, behavior: 'smooth' });
+
+    // Move the editor caret to the heading line and bring it into view.
+    const lines = editor.value.split('\n');
+    const line = +h.dataset.line;
+    const pos = lines.slice(0, line).reduce((n, l) => n + l.length + 1, 0);
+    editor.focus();
+    editor.setSelectionRange(pos, pos + lines[line].length);
+    const lh = parseFloat(getComputedStyle(editor).lineHeight) || 21;
+    editor.scrollTop = Math.max(0, line * lh - editor.clientHeight / 3);
+  });
+
+  preview.addEventListener('scroll', markActive);
+
+  const toggleOutline = document.getElementById('toggleOutline');
+  toggleOutline.addEventListener('click', () => {
+    const hidden = panes.classList.toggle('no-outline');
+    toggleOutline.classList.toggle('on', !hidden);
+  });
+
   function update() {
     const md = editor.value;
     preview.innerHTML = render(md);
+    buildOutline();
     const words = (md.trim().match(/\S+/g) || []).length;
     statusEl.textContent = words + ' words · ' + md.length + ' characters · ' + (md ? md.split('\n').length : 0) + ' lines';
     try { localStorage.setItem(STORE, md); } catch (e) { /* storage unavailable */ }
