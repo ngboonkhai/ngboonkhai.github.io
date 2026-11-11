@@ -23,9 +23,15 @@
   .toolbar .spacer { flex: 1; }
   .toolbar .primary { background: var(--accent); color: #fff; border-color: var(--accent); }
   .toolbar .primary:hover { color: #fff; opacity: .9; }
-  .panes { flex: 1; display: grid; grid-template-columns: 220px 1fr 1fr; min-height: 0; }
-  .panes.no-outline { grid-template-columns: 1fr 1fr; }
-  .panes.no-outline #outlinePane { display: none; }
+  .panes { --ow: 220px; --lf: .5fr; --rf: .5fr; flex: 1; display: grid; min-height: 0;
+           grid-template-columns: var(--ow) minmax(0, var(--lf)) 6px minmax(0, var(--rf)); }
+  /* Hidden outline keeps its (zero-width) grid slot so the other columns do not shift. */
+  .panes.no-outline { --ow: 0px; }
+  .panes.no-outline #outlinePane { overflow: hidden; border: 0; }
+  .divider { background: var(--border); cursor: col-resize; touch-action: none; position: relative; }
+  .divider:hover, .divider.active { background: var(--accent); }
+  body.dragging { user-select: none; cursor: col-resize; }
+  body.dragging.vertical { cursor: row-resize; }
   #outline { flex: 1; overflow: auto; padding: 6px 0; background: var(--panel); margin: 0; list-style: none; font-size: 13px; }
   #outline li a { display: block; padding: 4px 12px; color: var(--text); text-decoration: none; cursor: pointer;
                   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid transparent; }
@@ -58,9 +64,10 @@
   #preview li.task { list-style: none; margin-left: -1.2em; }
   .status { padding: 4px 12px; font-size: 12px; color: var(--muted); background: var(--panel); border-top: 1px solid var(--border); }
   @media (max-width: 720px) {
-    .panes, .panes.no-outline { grid-template-columns: 1fr; grid-template-rows: auto 1fr 1fr; }
-    .panes.no-outline { grid-template-rows: 1fr 1fr; }
+    .panes { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, var(--lf)) 6px minmax(0, var(--rf)); }
     #outlinePane { max-height: 140px; }
+    .panes.no-outline #outlinePane { max-height: 0; }
+    .divider { cursor: row-resize; }
     .pane + .pane { border-left: 0; border-top: 1px solid var(--border); }
   }
 </style>
@@ -103,6 +110,7 @@
     <div class="pane-title">Markdown</div>
     <textarea id="editor" spellcheck="false" placeholder="Type or paste Markdown here…"></textarea>
   </div>
+  <div class="divider" id="divider" role="separator" aria-orientation="vertical" title="Drag to resize"></div>
   <div class="pane">
     <div class="pane-title">Preview</div>
     <div id="preview"></div>
@@ -241,6 +249,7 @@
   // ── Outline ──
   const outline = document.getElementById('outline');
   const panes = document.getElementById('panes');
+  const outlinePane = document.getElementById('outlinePane');
   let headings = [];
 
   function buildOutline() {
@@ -298,6 +307,42 @@
     const hidden = panes.classList.toggle('no-outline');
     toggleOutline.classList.toggle('on', !hidden);
   });
+
+  // ── Resizable split between editor and preview ──
+  const divider = document.getElementById('divider');
+  const narrow = window.matchMedia('(max-width: 720px)');
+  const MIN_RATIO = 0.15; // keep both panes usable
+
+  function setRatio(ratio) {
+    ratio = Math.min(1 - MIN_RATIO, Math.max(MIN_RATIO, ratio));
+    panes.style.setProperty('--lf', ratio + 'fr');
+    panes.style.setProperty('--rf', (1 - ratio) + 'fr');
+  }
+
+  divider.addEventListener('pointerdown', e => {
+    divider.setPointerCapture(e.pointerId);
+    divider.classList.add('active');
+    document.body.classList.add('dragging');
+    document.body.classList.toggle('vertical', narrow.matches);
+  });
+  divider.addEventListener('pointermove', e => {
+    if (!divider.hasPointerCapture(e.pointerId)) return;
+    const box = panes.getBoundingClientRect();
+    const out = outlinePane.getBoundingClientRect();
+    if (narrow.matches) {
+      const avail = box.height - out.height - divider.offsetHeight;
+      setRatio((e.clientY - box.top - out.height - divider.offsetHeight / 2) / avail);
+    } else {
+      const avail = box.width - out.width - divider.offsetWidth;
+      setRatio((e.clientX - box.left - out.width - divider.offsetWidth / 2) / avail);
+    }
+  });
+  const endDrag = () => {
+    divider.classList.remove('active');
+    document.body.classList.remove('dragging', 'vertical');
+  };
+  divider.addEventListener('pointerup', endDrag);
+  divider.addEventListener('pointercancel', endDrag);
 
   function update() {
     const md = editor.value;
